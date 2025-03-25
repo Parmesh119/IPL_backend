@@ -20,3 +20,12 @@ data class player_team (
     val playerId: String,
     val teamId: String
 )
+
+data class PlayerList (
+    val search: String? = null,
+    val page: Int = 1,
+    val size: Int = 10,
+    val role: String? = null,
+    val status: String? = null,
+    val teamId: String? = null
+)

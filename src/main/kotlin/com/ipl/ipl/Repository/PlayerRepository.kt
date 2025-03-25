@@ -1,6 +1,7 @@
 package com.ipl.ipl.Repository
 
 import com.ipl.ipl.model.Player
+import com.ipl.ipl.model.PlayerList
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Repository
@@ -39,7 +40,36 @@ class PlayerRepository (
         "SELECT * FROM players WHERE id = ?", rowMapper, id
     )
 
-    fun listPlayers(): List<Player> = jdbcTemplate.query("SELECT * FROM players", rowMapper)
+    fun listPlayers(request: PlayerList): List<Player> {
+        val sql = StringBuilder("SELECT * FROM players WHERE 1=1")
+        val params = mutableListOf<Any>()
+
+        request.search?.let {
+            sql.append(" AND name ILIKE ?")
+            params.add("%$it%")
+        }
+
+        request.role?.let {
+            sql.append(" AND role = ?")
+            params.add(it)
+        }
+
+        request.status?.let {
+            sql.append(" AND status = ?")
+            params.add(it)
+        }
+
+        request.teamId?.let {
+            sql.append(" AND team_id = ?")
+            params.add(it)
+        }
+
+        sql.append(" LIMIT ? OFFSET ?")
+        params.add(request.size)
+        params.add((request.page - 1) * request.size)
+
+        return jdbcTemplate.query(sql.toString(), params.toTypedArray(), rowMapper)
+    }
 
     fun updatePlayer(id: String, player: Player): Player? {
         jdbcTemplate.update(

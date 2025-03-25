@@ -2,6 +2,7 @@ package com.ipl.ipl.Service
 
 import com.ipl.ipl.Repository.PlayerRepository
 import com.ipl.ipl.model.Player
+import com.ipl.ipl.model.PlayerList
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -11,7 +12,9 @@ class PlayerService (
 ){
     fun createPlayer(player: Player): Player? = repository.createPlayer(player, UUID.randomUUID().toString())
     fun getPlayerById(id: String): Player? = repository.getPlayerById(id)
-    fun listPlayers() = repository.listPlayers()
+    fun listPlayers(request: PlayerList): List<Player> {
+        return repository.listPlayers(request)
+    }
     fun updatePlayer(id: String, player: Player): Player? = repository.updatePlayer(id, player)
     fun deletePlayer(id: String): String {
         val player = repository.deletePlayer(id)

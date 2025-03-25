@@ -1,7 +1,7 @@
 package com.ipl.ipl.Service
 
 import com.ipl.ipl.Repository.UserRepository
-import com.ipl.ipl.model.AuthReponse
+import com.ipl.ipl.model.AuthResponse
 import com.ipl.ipl.model.User
 import org.springframework.stereotype.Service
 
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class UserService (
     private val userRepository: UserRepository
 ) {
-    fun login(username: String, password: String): AuthReponse {
+    fun login(username: String, password: String): AuthResponse {
         // Implement login logic here
         return userRepository.login(username, password)
     }
