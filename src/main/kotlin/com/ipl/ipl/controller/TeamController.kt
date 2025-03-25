@@ -2,6 +2,7 @@ package com.ipl.ipl.controller
 
 import com.ipl.ipl.Service.TeamService
 import com.ipl.ipl.model.Team
+import com.ipl.ipl.model.player_team
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -26,4 +27,14 @@ class TeamController (
 
     @DeleteMapping("/delete/{id}")
     fun deleteTeam(@PathVariable id: String): ResponseEntity<String> = ResponseEntity.ok(teamService.deleteTeam(id))
+
+    @PostMapping("/add/player")
+    fun addPlayerToTeam(@RequestBody addPlayerRequest: player_team): ResponseEntity<Team> = ResponseEntity.ok(teamService.addPlayerToTeam(addPlayerRequest))
+
+    @DeleteMapping("/remove/player/{playerId}")
+    fun removePlayerFromTeam(@PathVariable playerId: String): ResponseEntity<String> {
+        // Implement logic to remove a player from a team
+        teamService.removePlayerFromTeam(playerId)
+        return ResponseEntity.ok("Player removed from team")
+    }
 }

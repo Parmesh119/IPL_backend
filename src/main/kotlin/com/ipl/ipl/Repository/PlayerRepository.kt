@@ -20,6 +20,7 @@ class PlayerRepository (
             role = rs.getString("role"),
             battingStyle = rs.getString("batting_style"),
             bowlingStyle = rs.getString("bowling_style"),
+            teamId = rs.getString("team_id"),
             createdAt = rs.getLong("created_at"),
             updatedAt = rs.getLong("updated_at")
         )
@@ -27,8 +28,8 @@ class PlayerRepository (
 
     fun createPlayer(player: Player, id: String): Player? {
         jdbcTemplate.update(
-            "INSERT INTO players (id, name, country, age, role, batting_style, bowling_style, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            id, player.name, player.country, player.age, player.role, player.battingStyle, player.bowlingStyle, player.createdAt, player.updatedAt
+            "INSERT INTO players (id, name, country, age, role, batting_style, bowling_style, team_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            id, player.name, player.country, player.age, player.role, player.battingStyle, player.bowlingStyle, player.teamId, player.createdAt, player.updatedAt
 
         )
         return getPlayerById(id)
@@ -42,8 +43,8 @@ class PlayerRepository (
 
     fun updatePlayer(id: String, player: Player): Player? {
         jdbcTemplate.update(
-            "UPDATE players SET name = ?, country = ?, age = ?, role = ?, batting_style = ?, bowling_style = ?, updated_at = ? WHERE id = ?",
-            player.name, player.country, player.age, player.role, player.battingStyle, player.bowlingStyle, Instant.now().toEpochMilli(), id
+            "UPDATE players SET name = ?, country = ?, age = ?, role = ?, batting_style = ?, bowling_style = ?, team_id = ?, updated_at = ? WHERE id = ?",
+            player.name, player.country, player.age, player.role, player.battingStyle, player.bowlingStyle, player.teamId, Instant.now().toEpochMilli(), id
         )
 
         return getPlayerById(id)

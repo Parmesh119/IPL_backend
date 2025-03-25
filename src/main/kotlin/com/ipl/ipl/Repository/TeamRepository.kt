@@ -1,6 +1,8 @@
 package com.ipl.ipl.Repository
 
 import com.ipl.ipl.model.Team
+import com.ipl.ipl.model.player_team
+import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 
@@ -40,6 +42,7 @@ class TeamRepository (
                 "SELECT * FROM team WHERE id = ?", rowMapper, id
             )
         } catch (e: Exception) {
+            println(e.message)
             throw Exception("Failed to get team by id")
         }
     }
@@ -71,4 +74,28 @@ class TeamRepository (
             throw Exception("Failed to delete team")
         }
     }
+
+    fun addPlayerToTeam(playerId: String, teamId: String): Team? {
+        return try {
+            jdbcTemplate.update(
+                "UPDATE players SET team_id = ? WHERE id = ?",
+                teamId, playerId
+            )
+            getTeamById(teamId)
+        } catch (e: DataAccessException) {
+            throw RuntimeException("Failed to add player to team")
+        }
+    }
+
+    fun removePlayerFromTeam(playerId: String): Int {
+        return try {
+            jdbcTemplate.update(
+                "UPDATE players SET team_id = NULL WHERE id = ?",
+                playerId
+            )
+        } catch (e: DataAccessException) {
+            throw RuntimeException("Failed to remove player from team")
+        }
+    }
+
 }
