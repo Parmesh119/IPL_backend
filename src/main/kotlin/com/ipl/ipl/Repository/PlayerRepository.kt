@@ -1,7 +1,6 @@
 package com.ipl.ipl.Repository
 
 import com.ipl.ipl.model.Player
-import com.ipl.ipl.model.PlayerList
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Repository
@@ -22,6 +21,9 @@ class PlayerRepository (
             battingStyle = rs.getString("batting_style"),
             bowlingStyle = rs.getString("bowling_style"),
             teamId = rs.getString("team_id"),
+            basePrice = rs.getString("baseprice"),
+            sellPrice = rs.getString("sellprice"),
+            status = rs.getString("status"),
             createdAt = rs.getLong("created_at"),
             updatedAt = rs.getLong("updated_at")
         )
@@ -29,8 +31,8 @@ class PlayerRepository (
 
     fun createPlayer(player: Player, id: String): Player? {
         jdbcTemplate.update(
-            "INSERT INTO players (id, name, country, age, role, batting_style, bowling_style, team_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            id, player.name, player.country, player.age, player.role, player.battingStyle, player.bowlingStyle, player.teamId, player.createdAt, player.updatedAt
+            "INSERT INTO players (id, name, country, age, role, batting_style, bowling_style, team_id, baseprice, sellprice, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            id, player.name, player.country, player.age, player.role, player.battingStyle, player.bowlingStyle, player.teamId, player.basePrice, player.sellPrice, player.status, player.createdAt, player.updatedAt
 
         )
         return getPlayerById(id)
@@ -40,41 +42,22 @@ class PlayerRepository (
         "SELECT * FROM players WHERE id = ?", rowMapper, id
     )
 
-    fun listPlayers(request: PlayerList): List<Player> {
-        val sql = StringBuilder("SELECT * FROM players WHERE 1=1")
-        val params = mutableListOf<Any>()
+    fun listPlayers(): List<Player> {
+        val players = jdbcTemplate.query("SELECT * FROM players", rowMapper)
 
-        request.search?.let {
-            sql.append(" AND name ILIKE ?")
-            params.add("%$it%")
-        }
-
-        request.role?.let {
-            sql.append(" AND role = ?")
-            params.add(it)
-        }
-
-        request.status?.let {
-            sql.append(" AND status = ?")
-            params.add(it)
-        }
-
-        request.teamId?.let {
-            sql.append(" AND team_id = ?")
-            params.add(it)
-        }
-
-        sql.append(" LIMIT ? OFFSET ?")
-        params.add(request.size)
-        params.add((request.page - 1) * request.size)
-
-        return jdbcTemplate.query(sql.toString(), params.toTypedArray(), rowMapper)
+//        return players.map { player ->
+//            val teamName = player?.teamId?.let { teamId ->
+//                jdbcTemplate.queryForObject("SELECT name FROM team WHERE id = ?", String::class.java, teamId)
+//            }
+//            player.copy(teamId = teamName)
+//        }
+        return players
     }
 
     fun updatePlayer(id: String, player: Player): Player? {
         jdbcTemplate.update(
-            "UPDATE players SET name = ?, country = ?, age = ?, role = ?, batting_style = ?, bowling_style = ?, team_id = ?, updated_at = ? WHERE id = ?",
-            player.name, player.country, player.age, player.role, player.battingStyle, player.bowlingStyle, player.teamId, Instant.now().toEpochMilli(), id
+            "UPDATE players SET name = ?, country = ?, age = ?, role = ?, batting_style = ?, bowling_style = ?, team_id = ?, baseprice = ?, sellprice = ?, status = ?, updated_at = ? WHERE id = ?",
+            player.name, player.country, player.age, player.role, player.battingStyle, player.bowlingStyle, player.teamId, player.basePrice, player.sellPrice, player.status, Instant.now().toEpochMilli(), id
         )
 
         return getPlayerById(id)

@@ -12,6 +12,9 @@ data class Player(
     val battingStyle: String,
     val bowlingStyle: String?,
     val teamId: String? = null,
+    val basePrice: String,
+    val sellPrice: String? = null,
+    val status: String? = "Pending",
     val createdAt: Long = Instant.now().toEpochMilli(),
     val updatedAt: Long = Instant.now().toEpochMilli()
 )

@@ -1,9 +1,14 @@
 package com.ipl.ipl.config
 
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
+import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util.*
 import javax.crypto.SecretKey
@@ -16,17 +21,18 @@ class JwtUtil {
     private lateinit var SECRET_KEY: String
 
     @Value("\${jwt.access.expiration}")
-    private lateinit var EXPIRATION_TIME: String
+    private var EXPIRATION_TIME: Long = 0
 
+    // Using a single key creation method for consistency
     private val key by lazy {
-        val hmacKey = SECRET_KEY.toByteArray()
-        SecretKeySpec(hmacKey, SignatureAlgorithm.HS256.jcaName)
+        SecretKeySpec(SECRET_KEY.toByteArray(), SignatureAlgorithm.HS256.jcaName)
     }
 
-    fun generateToken(
+    fun generateAcessToken(
         subject: String,
+        id: String,
         claims: Map<String, Any>? = null,
-        expirationMinutes: Long = 60
+        expirationMinutes: Long = EXPIRATION_TIME,
     ): String {
         try {
             val now = Instant.now()
@@ -34,6 +40,7 @@ class JwtUtil {
 
             val jwtBuilder = Jwts.builder()
                 .setSubject(subject)
+                .claim("userId", id)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(expiration))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -44,5 +51,51 @@ class JwtUtil {
         } catch (e: Exception) {
             throw RuntimeException("Failed to generate JWT token", e)
         }
+    }
+
+    fun generateRefreshToken(username: String): String {
+        return try {
+            val now = Instant.now()
+            val expiration = now.plusSeconds(60 * 60 * 24 * 7) // 7 days
+
+            Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(expiration))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact()
+        } catch (e: Exception) {
+            throw RuntimeException("Failed to generate refresh token", e)
+        }
+    }
+
+    fun getSubjectFromToken(token: String): String {
+        return try {
+            val claims = Jwts.parserBuilder()
+                .setSigningKey(key) // Using the same key instance here
+                .build()
+                .parseClaimsJws(token)
+                .body
+
+            claims.subject ?: throw RuntimeException("Subject not found in token")
+        } catch (e: JwtException) {
+            throw RuntimeException("Invalid JWT token", e)
+        }
+    }
+
+    fun extractClaims(token: String): Claims {
+        return Jwts.parserBuilder()
+            .setSigningKey(key) // Using the same key instance here
+            .build()
+            .parseClaimsJws(token)
+            .body
+    }
+
+    fun extractUsername(token: String): String {
+        return extractClaims(token).subject
+    }
+
+    private fun isTokenExpired(token: String): Boolean {
+        return extractClaims(token).expiration.before(Date())
     }
 }

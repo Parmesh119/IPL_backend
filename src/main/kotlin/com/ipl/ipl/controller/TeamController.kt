@@ -19,7 +19,7 @@ class TeamController (
     @GetMapping("/get/{id}")
     fun getTeamById(@PathVariable id: String): Team? = teamService.getTeamById(id)
 
-    @PostMapping("/list")
+    @GetMapping("/list")
     fun listTeams(): ResponseEntity<List<Team>> = ResponseEntity.ok(teamService.listTeams())
 
     @PostMapping("/update")
