@@ -44,13 +44,6 @@ class PlayerRepository (
 
     fun listPlayers(): List<Player> {
         val players = jdbcTemplate.query("SELECT * FROM players", rowMapper)
-
-//        return players.map { player ->
-//            val teamName = player?.teamId?.let { teamId ->
-//                jdbcTemplate.queryForObject("SELECT name FROM team WHERE id = ?", String::class.java, teamId)
-//            }
-//            player.copy(teamId = teamName)
-//        }
         return players
     }
 
@@ -61,6 +54,13 @@ class PlayerRepository (
         )
 
         return getPlayerById(id)
+    }
+
+    fun findTeamByPlayerId(playerId: String): Int {
+        return jdbcTemplate.queryForObject(
+            "SELECT COUNT(team_id) FROM players WHERE id = ?",
+            Int::class.java, playerId
+        ) ?: 0
     }
 
     fun deletePlayer(id: String): Int = jdbcTemplate.update("DELETE FROM players WHERE id = ?", id)

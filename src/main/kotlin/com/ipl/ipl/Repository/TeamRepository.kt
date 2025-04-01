@@ -1,7 +1,6 @@
 package com.ipl.ipl.Repository
 
 import com.ipl.ipl.model.Team
-import com.ipl.ipl.model.player_team
 import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
@@ -49,11 +48,39 @@ class TeamRepository (
 
     fun listTeams(): List<Team> {
         try {
-            return jdbcTemplate.query("SELECT * FROM team", rowMapper)
+            return jdbcTemplate.query(
+                """
+            SELECT 
+                t.id, t.name, t.owner, t.coach, t.captain, t.vice_captain, 
+                COUNT(p.id) as players, 
+                COALESCE(SUM(NULLIF(REGEXP_REPLACE(p.sellprice, '[^0-9.]', '', 'g'), '')::NUMERIC), 0) AS spent_money, 
+                t.created_at, t.updated_at 
+            FROM team t 
+            LEFT JOIN players p ON t.id = p.team_id 
+            GROUP BY t.id
+            """,
+                { rs, _ ->
+                    Team(
+                        id = rs.getString("id"),
+                        name = rs.getString("name"),
+                        owner = rs.getString("owner"),
+                        coach = rs.getString("coach"),
+                        captain = rs.getString("captain"),
+                        viceCaptain = rs.getString("vice_captain"),
+                        players = rs.getInt("players"),
+                        spent = rs.getDouble("spent_money"),
+                        createdAt = rs.getLong("created_at"),
+                        updatedAt = rs.getLong("updated_at"),
+                    )
+                }
+            )
         } catch (e: Exception) {
+            println(e.message)
+            e.printStackTrace()
             throw Exception("Failed to list teams")
         }
     }
+
 
     fun updateTeam(id: String, team: Team): Team? {
         try {
