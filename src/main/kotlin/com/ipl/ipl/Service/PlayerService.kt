@@ -9,7 +9,14 @@ import java.util.UUID
 class PlayerService (
     private val repository: PlayerRepository
 ){
-    fun createPlayer(player: Player): Player? = repository.createPlayer(player, UUID.randomUUID().toString())
+    fun createPlayer(player: Player): Player? {
+        if (player.sellPrice != null && player.sellPrice >= player.basePrice) {
+            player.status = "Sold"
+        } else {
+            player.status = "Pending"
+        }
+        return repository.createPlayer(player, UUID.randomUUID().toString())
+    }
     fun getPlayerById(id: String): Player? = repository.getPlayerById(id)
     fun listPlayers(): List<Player> {
         return repository.listPlayers()
