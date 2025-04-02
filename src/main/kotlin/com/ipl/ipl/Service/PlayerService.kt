@@ -14,9 +14,21 @@ class PlayerService (
     fun listPlayers(): List<Player> {
         return repository.listPlayers()
     }
-    fun updatePlayer(id: String, player: Player): Player? = repository.updatePlayer(id, player)
+    fun updatePlayer(id: String, player: Player): Player? {
+        if (player.sellPrice != null && player.sellPrice >= player.basePrice) {
+            player.status = "Sold"
+        } else {
+            player.status = "Pending"
+        }
+        return repository.updatePlayer(id, player)
+    }
     fun deletePlayer(id: String): String {
-        val player = repository.deletePlayer(id)
-        return if (player > 0) "Player deleted successfully" else "Player not found"
+        val team = repository.findTeamByPlayerId(id)
+        if(team == 0) {
+            val player = repository.deletePlayer(id)
+            return if (player > 0) "Player deleted successfully" else "Player not found"
+        } else {
+            throw Exception("Player is already a part of a team")
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.ipl.ipl.Service
 
 import com.ipl.ipl.Repository.TeamRepository
 import com.ipl.ipl.model.Team
+import com.ipl.ipl.model.Team_DTO
 import com.ipl.ipl.model.player_team
 import org.springframework.stereotype.Service
 
@@ -12,7 +13,7 @@ class TeamService (
 
     fun createTeam(team: Team): Team = teamRepository.createTeam(team)
 
-    fun getTeamById(id: String): Team? = teamRepository.getTeamById(id)
+    fun getTeamDetailsById(id: String): Team_DTO? = teamRepository.getTeamDetailById(id)
 
     fun listTeams(): List<Team> = teamRepository.listTeams()
 
