@@ -2,6 +2,7 @@ package com.ipl.ipl.controller
 
 import com.ipl.ipl.Service.TeamService
 import com.ipl.ipl.model.Team
+import com.ipl.ipl.model.Team_DTO
 import com.ipl.ipl.model.player_team
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,7 +18,7 @@ class TeamController (
     fun createTeam(@RequestBody team: Team): ResponseEntity<Team> = ResponseEntity.ok(teamService.createTeam(team))
 
     @GetMapping("/get/{id}")
-    fun getTeamById(@PathVariable id: String): Team? = teamService.getTeamById(id)
+    fun getTeamDetailsById(@PathVariable id: String): Team_DTO? = teamService.getTeamDetailsById(id)
 
     @GetMapping("/list")
     fun listTeams(): ResponseEntity<List<Team>> = ResponseEntity.ok(teamService.listTeams())
