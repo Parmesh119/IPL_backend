@@ -23,13 +23,18 @@ class TeamService (
     fun updateTeam(id: String, team: Team): Team? = teamRepository.updateTeam(id, team)
 
     fun deleteTeam(id: String): String {
-        val updateStatus = playerRepository.updatePlayerSellPriceStatus("Pending", id)
-        if(updateStatus > 0) {
-            val team = teamRepository.deleteTeam(id)
-            return if (team > 0) "Team deleted successfully" else "Team not found"
+        val count = playerRepository.countPlayerByTeamId(id)
+        var updateStatus = 0
+        var team = 0
+        if(count > 0){
+            updateStatus = playerRepository.updatePlayerSellPriceStatus("Pending", id)
+            if(updateStatus > 0) {
+                team = teamRepository.deleteTeam(id)
+            }
         } else {
-            throw Exception("Error while deleting team!!")
+            team = teamRepository.deleteTeam(id)
         }
+        return if (team > 0) "Team deleted successfully" else "Team not found"
     }
 
     fun addPlayerToTeam(addPlayerRequest: player_team): Team {
