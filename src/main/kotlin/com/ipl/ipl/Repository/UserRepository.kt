@@ -6,6 +6,7 @@ import com.ipl.ipl.model.RegisterRequest
 import com.ipl.ipl.model.User
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
+import java.sql.ResultSet
 import java.util.*
 
 @Repository
@@ -15,11 +16,12 @@ class UserRepository(
     private val refreshTokenRepository: RefreshTokenRepository
 ) {
 
-    private val rowMapper = { rs: java.sql.ResultSet, _: Int ->
+    private val rowMapper = { rs: ResultSet, _: Int ->
         User(
             id = rs.getString("id"),
             username = rs.getString("username"),
             password = rs.getString("password"),
+            role = rs.getString("role"),
             createdAt = rs.getLong("created_at")
         )
     }
@@ -43,7 +45,7 @@ class UserRepository(
             }
 
             // Generate JWT token if authentication is successful
-            val accessToken = jwtUtil.generateAcessToken(username, storedUser.id!!)
+            val accessToken = jwtUtil.generateAcessToken(username, storedUser.id!!, storedUser.role.split(","))
             val refreshToken = jwtUtil.generateRefreshToken(username)
 
             // Store the refresh token in the database
@@ -81,11 +83,12 @@ class UserRepository(
 
             // Insert the new user into the database
             jdbcTemplate.update(
-                "INSERT INTO users (id, username, password, name, created_at) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO users (id, username, password, name, role, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                 newUserId,
                 registerRequest.username,
                 registerRequest.password,
                 registerRequest.name,
+                registerRequest.role.joinToString(","),
                 registerRequest.createdAt
             )
 
@@ -93,6 +96,7 @@ class UserRepository(
                 id = newUserId,
                 username = registerRequest.username,
                 password = registerRequest.password,
+                role = registerRequest.role.joinToString(","),
                 createdAt = registerRequest.createdAt
             )
         } catch (e: Exception) {
@@ -119,7 +123,7 @@ class UserRepository(
             val username = jwtUtil.getSubjectFromToken(refreshToken)
             val user = getUserDetails(username)
             // Generate a new access token
-            val newAccessToken = jwtUtil.generateAcessToken(username, user.id!!)
+            val newAccessToken = jwtUtil.generateAcessToken(username, user.id!!, user.role.split(","))
             val newRefreshToken = jwtUtil.generateRefreshToken(username)
 
             // Store the new refresh token in the database

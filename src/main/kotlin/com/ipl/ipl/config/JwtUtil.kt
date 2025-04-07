@@ -6,15 +6,17 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
+import org.springframework.stereotype.Component
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util.*
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
-@Configuration
+@Component
 class JwtUtil {
 
     @Value("\${jwt.secret}")
@@ -31,6 +33,7 @@ class JwtUtil {
     fun generateAcessToken(
         subject: String,
         id: String,
+        role: List<String>,
         claims: Map<String, Any>? = null,
         expirationMinutes: Long = EXPIRATION_TIME,
     ): String {
@@ -41,6 +44,7 @@ class JwtUtil {
             val jwtBuilder = Jwts.builder()
                 .setSubject(subject)
                 .claim("userId", id)
+                .claim("role", role)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(expiration))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -85,10 +89,11 @@ class JwtUtil {
 
     fun extractClaims(token: String): Claims {
         return Jwts.parserBuilder()
-            .setSigningKey(key) // Using the same key instance here
+            .setSigningKey(key)
             .build()
             .parseClaimsJws(token)
             .body
+        ?: throw RuntimeException("Claims not found in token")
     }
 
     fun extractUsername(token: String): String {
@@ -97,5 +102,33 @@ class JwtUtil {
 
     private fun isTokenExpired(token: String): Boolean {
         return extractClaims(token).expiration.before(Date())
+    }
+
+    fun extractRoles(token: String): List<String> {
+        val claims = extractClaims(token)
+        return claims["role"] as? List<String> ?: emptyList()
+    }
+
+    fun getUserIdFromToken(token: String): String {
+        return try {
+            val claims = Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY.toByteArray(StandardCharsets.UTF_8))
+                .build()
+                .parseClaimsJws(token)
+                .body
+
+            // Get the userId from the claims
+            claims.get("userId", String::class.java) ?: throw Exception("User ID not found in token")
+        } catch (e: Exception) {
+            println(e.message)
+            throw Exception("Invalid token")
+        }
+    }
+
+    fun getTokenFromRequest(request: HttpServletRequest): String? {
+        val authHeader = request.getHeader("Authorization")
+        return if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            authHeader.substring(7)
+        } else null
     }
 }
