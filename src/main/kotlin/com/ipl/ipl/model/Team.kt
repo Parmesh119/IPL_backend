@@ -7,8 +7,8 @@ data class Team (
     val name: String,
     val owner: String,
     val coach: String,
-    val captain: String,
-    val viceCaptain: String,
+    val captain: String? = null,
+    val viceCaptain: String? = null,
     val players: Int = 0,
     val spent: Double = 0.0,
     val createdAt: Long = System.currentTimeMillis(),
@@ -20,16 +20,16 @@ data class Team_DTO (
     val name: String,
     val owner: String,
     val coach: String,
-    val captain: String,
-    val viceCaptain: String,
-    val players: Int,
-    val spent: Double,
-    val batsmenCount: Int,
-    val bowlersCount: Int,
-    val allRoundersCount: Int,
+    val captain: String? = "",
+    val viceCaptain: String? = "",
+    val players: Int? = 0,
+    val spent: Double? = 0.0,
+    val batsmenCount: Int? = 0,
+    val bowlersCount: Int? = 0,
+    val allRoundersCount: Int? = 0,
     val createdAt: Long,
     val updatedAt: Long,
-    val playersBought: List<Player_DTO>
+    val playersBought: List<Player_DTO>? = emptyList()
 )
 
 data class Player_DTO (

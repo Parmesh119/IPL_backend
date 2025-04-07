@@ -61,6 +61,7 @@ class TeamRepository(
         p.role,
         p.sellprice,
         p.team_id,
+        p.ipl_team,
         p.status,  -- Add status check
         ROW_NUMBER() OVER (PARTITION BY p.team_id ORDER BY p.created_at) AS sr_no
     FROM players p
@@ -88,7 +89,7 @@ SELECT
     JSON_BUILD_OBJECT(
         'srNo', p.sr_no,
         'player', COALESCE(p.player_name, ''),  -- Prevent null values
-        'iplTeam', t.name,
+        'iplTeam', p.ipl_team,
         'role', p.role,
         'price', CAST(NULLIF(REGEXP_REPLACE(p.sellprice, '[^0-9.]', '', 'g'), '') AS DOUBLE PRECISION)
     )
@@ -127,23 +128,16 @@ GROUP BY t.id;
 
     fun parsePlayersBought(jsonArrayString: String?): List<Player_DTO> {
         if (jsonArrayString.isNullOrEmpty()) {
-//            println("JSON array string is null or empty")
             return emptyList()
         }
 
-//        println("Raw JSON: $jsonArrayString")  // Print the raw JSON for debugging
-
         val objectMapper = jacksonObjectMapper()
         return try {
-            // Try to parse as array of Player_DTO
             val result: List<Player_DTO> = objectMapper.readValue(jsonArrayString)
-//            println("Successfully parsed ${result.size} players")
             result
         } catch (e: Exception) {
-//            println("Error parsing JSON: ${e.message}")
             e.printStackTrace()
 
-            // Alternative approach: try to parse manually
             try {
                 val jsonArray = objectMapper.readTree(jsonArrayString) as ArrayNode
                 val playersList = mutableListOf<Player_DTO>()
