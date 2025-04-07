@@ -61,6 +61,14 @@ class PlayerRepository (
             sql.append(" AND status IN (${it.joinToString(",") { "'$it'" }})")
         }
 
+        playerList.iplTeam?.let {
+            sql.append(" AND ipl_team IN (${it.joinToString(",") { "'$it'" }})")
+        }
+
+        playerList.team?.let {
+            sql.append(" AND team_id IN (${it.joinToString(",") { "'$it'" }})")
+        }
+
         sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?")
         params.add(playerList.size)
         params.add((playerList.page - 1) * playerList.size)

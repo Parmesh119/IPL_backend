@@ -30,5 +30,7 @@ data class PlayerList (
     val page: Int = 1,
     val size: Int = 10,
     val roles: List<String>? = null,
-    val status: List<String>? = null
+    val status: List<String>? = null,
+    val iplTeam: List<String>? = null,
+    val team: List<String>? = null,
 )
