@@ -33,10 +33,14 @@ class AuctionRepository (private val jdbcTemplate: JdbcTemplate) {
     }
 
     fun getPlayerByCurrent_Bid(): List<Auction> {
-        return jdbcTemplate.query(
-            "SELECT * FROM players WHERE status = 'Current_Bid'",
-            rowMapper
-        )
+        try {
+            return jdbcTemplate.query(
+                "SELECT * FROM players WHERE status = 'Current_Bid'",
+                rowMapper
+            )
+        } catch (e: Exception) {
+            return emptyList()
+        }
     }
 
     fun markPlayerSold(auction: Auction): String {
