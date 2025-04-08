@@ -10,16 +10,18 @@ class AuctionService(
     private val auctionRepository: AuctionRepository,
     private val jwtUtil: JwtUtil
 ) {
-    fun getPlayers(authorization: String): List<Auction> {
-        var player = auctionRepository.getPlayerByRandom()
+    fun getPlayers(authorization: String): Auction {
+        val player = auctionRepository.getPlayerByRandom()
         val token = authorization.substring(7)
         val role = jwtUtil.extractRoles(token)
         val cleanedRole = role[0]
         if(cleanedRole.contains("ADMIN")) {
-            auctionRepository.updateStatusToCurrentBid(player.first().playerId)
+            if (player != null) {
+                auctionRepository.updateStatusToCurrentBid(player.playerId)
+            }
         }
-        player = auctionRepository.getPlayerByCurrent_Bid()
-        return player
+        val return_player = auctionRepository.getPlayerByCurrent_Bid()
+        return return_player
     }
 
     fun markPlayerSold(auction: Auction): String {
@@ -44,5 +46,9 @@ class AuctionService(
 
     fun markPlayerUnSold(auction: Auction): String {
         return auctionRepository.markPlayerUnSold(auction)
+    }
+
+    fun updateStatus(playerId: String) {
+        return auctionRepository.updateStatus(playerId)
     }
 }

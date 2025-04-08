@@ -11,7 +11,3 @@ data class Auction (
     var sellPrice: String? = null,
     val teamId: String? = null,
 )
-
-data class ChangeStatus (
-    val playerId: String
-)
