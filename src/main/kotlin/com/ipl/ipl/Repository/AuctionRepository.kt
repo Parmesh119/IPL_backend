@@ -18,11 +18,15 @@ class AuctionRepository (private val jdbcTemplate: JdbcTemplate) {
         )
     }
 
-    fun getPlayerByRandom(): List<Auction> {
-        return jdbcTemplate.query(
-            "SELECT * FROM players WHERE status = 'Pending' ORDER BY RANDOM() LIMIT 1",
-            rowMapper
-        )
+    fun getPlayerByRandom(): Auction? {
+        val sql = """
+            SELECT * FROM players 
+            WHERE status = 'Pending' 
+            ORDER BY RANDOM() 
+            LIMIT 1
+        """.trimIndent()
+
+        return jdbcTemplate.queryForObject(sql, rowMapper)
     }
 
     fun updateStatusToCurrentBid(Id: String) {
@@ -32,11 +36,15 @@ class AuctionRepository (private val jdbcTemplate: JdbcTemplate) {
         )
     }
 
-    fun getPlayerByCurrent_Bid(): List<Auction> {
-        return jdbcTemplate.query(
-            "SELECT * FROM players WHERE status = 'Current_Bid'",
-            rowMapper
-        )
+    fun getPlayerByCurrent_Bid(): Auction {
+        try {
+            return jdbcTemplate.queryForObject(
+                "SELECT * FROM players WHERE status = 'Current_Bid' ORDER BY RANDOM() LIMIT 1",
+                rowMapper
+            ) ?: throw Exception("No player found with status 'Current_Bid'")
+        } catch (e: Exception) {
+            throw Exception("No player found with status 'Current_Bid'")
+        }
     }
 
     fun markPlayerSold(auction: Auction): String {
@@ -75,5 +83,12 @@ class AuctionRepository (private val jdbcTemplate: JdbcTemplate) {
         ) ?: 0.0
 
         return spent
+    }
+
+    fun updateStatus(playerId: String) {
+        jdbcTemplate.update(
+            "UPDATE players SET status = 'Pending' WHERE id = ?",
+            playerId
+        )
     }
 }

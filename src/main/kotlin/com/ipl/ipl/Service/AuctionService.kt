@@ -1,19 +1,27 @@
 package com.ipl.ipl.Service
 
 import com.ipl.ipl.Repository.AuctionRepository
-import com.ipl.ipl.Repository.PlayerRepository
+import com.ipl.ipl.config.JwtUtil
 import com.ipl.ipl.model.Auction
 import org.springframework.stereotype.Service
 class TeamBudgetExceededException(message: String) : RuntimeException(message)
 @Service
-class AuctionService (
-    private val auctionRepository: AuctionRepository
+class AuctionService(
+    private val auctionRepository: AuctionRepository,
+    private val jwtUtil: JwtUtil
 ) {
-    fun getPlayers(): List<Auction> {
-        var player = auctionRepository.getPlayerByRandom()
-//        auctionRepository.updateStatusToCurrentBid(player.first().playerId)
-//        player = auctionRepository.getPlayerByCurrent_Bid()
-        return player
+    fun getPlayers(authorization: String): Auction {
+        val player = auctionRepository.getPlayerByRandom()
+        val token = authorization.substring(7)
+        val role = jwtUtil.extractRoles(token)
+        val cleanedRole = role[0]
+        if(cleanedRole.contains("ADMIN")) {
+            if (player != null) {
+                auctionRepository.updateStatusToCurrentBid(player.playerId)
+            }
+        }
+        val return_player = auctionRepository.getPlayerByCurrent_Bid()
+        return return_player
     }
 
     fun markPlayerSold(auction: Auction): String {
@@ -38,5 +46,9 @@ class AuctionService (
 
     fun markPlayerUnSold(auction: Auction): String {
         return auctionRepository.markPlayerUnSold(auction)
+    }
+
+    fun updateStatus(playerId: String) {
+        return auctionRepository.updateStatus(playerId)
     }
 }

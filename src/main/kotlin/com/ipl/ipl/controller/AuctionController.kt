@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 class TeamBudgetExceededException(message: String) : RuntimeException(message)
@@ -19,9 +20,9 @@ class AuctionController (
 ) {
 
     @PostMapping("/get/players")
-    fun getPlayers(): ResponseEntity<List<Auction>> {
+    fun getPlayers(@RequestHeader authorization: String): ResponseEntity<Auction> {
         // Implement logic to fetch players from the auction
-        return ResponseEntity.ok(auctionService.getPlayers())
+        return ResponseEntity.ok(auctionService.getPlayers(authorization))
     }
 
     @PostMapping("/mark/sold")
@@ -42,4 +43,8 @@ class AuctionController (
         return ResponseEntity.ok(auctionService.markPlayerUnSold(auction))
     }
 
+    @PostMapping("/update/status")
+    fun updateStatus(@RequestBody auction: Auction) {
+        auctionService.updateStatus(auction.playerId)
+    }
 }
