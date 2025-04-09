@@ -55,50 +55,45 @@ class TeamRepository(
             return jdbcTemplate.queryForObject(
                 """
             WITH PlayerData AS (
-    SELECT 
-        p.id AS player_id,
-        p.name AS player_name,  -- Ensure this column is retrieved properly
-        p.role,
-        p.sellprice,
-        p.team_id,
-        p.ipl_team,
-        p.status,  -- Add status check
-        ROW_NUMBER() OVER (PARTITION BY p.team_id ORDER BY p.created_at) AS sr_no
-    FROM players p
-    WHERE p.status = 'Sold' -- Only include sold players
-)
-SELECT 
-    t.id AS id, 
-    t.name AS name, 
-    t.owner AS owner, 
-    t.coach AS coach, 
-    t.captain AS captain, 
-    t.vice_captain AS vice_captain, 
-    t.created_at AS created_at, 
-    t.updated_at AS updated_at, 
-    COUNT(p.player_id) AS players, 
-    COALESCE(SUM(
-        CAST(
-            NULLIF(REGEXP_REPLACE(p.sellprice, '[^0-9.]', '', 'g'), '') AS DOUBLE PRECISION
-        )
-    ), 0) AS spent, 
-    COUNT(CASE WHEN p.role = 'Batsman' THEN 1 END) AS batsmen_count, 
-    COUNT(CASE WHEN p.role = 'Bowler' THEN 1 END) AS bowlers_count, 
-    COUNT(CASE WHEN p.role = 'All-rounder' THEN 1 END) AS all_rounders_count, 
-    JSON_AGG(
-    JSON_BUILD_OBJECT(
-        'srNo', p.sr_no,
-        'player', COALESCE(p.player_name, ''),  -- Prevent null values
-        'iplTeam', p.ipl_team,
-        'role', p.role,
-        'price', CAST(NULLIF(REGEXP_REPLACE(p.sellprice, '[^0-9.]', '', 'g'), '') AS DOUBLE PRECISION)
-    )
-) FILTER (WHERE p.player_id IS NOT NULL) AS players_bought
-FROM team t
-LEFT JOIN PlayerData p ON t.id = p.team_id
-WHERE t.id = ?
-GROUP BY t.id;
-
+                SELECT 
+                    p.id AS player_id,
+                    p.name AS player_name,
+                    p.role,
+                    p.sellprice,
+                    p.team_id,
+                    p.ipl_team,
+                    p.status,
+                    ROW_NUMBER() OVER (PARTITION BY p.team_id ORDER BY p.created_at) AS sr_no
+                FROM players p
+                WHERE p.status = 'Sold'
+            )
+            SELECT 
+                t.id AS id, 
+                t.name AS name, 
+                t.owner AS owner, 
+                t.coach AS coach, 
+                t.captain AS captain, 
+                t.vice_captain AS vice_captain, 
+                t.created_at AS created_at, 
+                t.updated_at AS updated_at, 
+                COUNT(p.player_id) AS players, 
+                COALESCE(SUM(p.sellprice), 0) AS spent, 
+                COUNT(CASE WHEN p.role = 'Batsman' THEN 1 END) AS batsmen_count, 
+                COUNT(CASE WHEN p.role = 'Bowler' THEN 1 END) AS bowlers_count, 
+                COUNT(CASE WHEN p.role = 'All-rounder' THEN 1 END) AS all_rounders_count, 
+                JSON_AGG(
+                    JSON_BUILD_OBJECT(
+                        'srNo', p.sr_no,
+                        'player', COALESCE(p.player_name, ''),
+                        'iplTeam', p.ipl_team,
+                        'role', p.role,
+                        'price', p.sellprice
+                    )
+                ) FILTER (WHERE p.player_id IS NOT NULL) AS players_bought
+            FROM team t
+            LEFT JOIN PlayerData p ON t.id = p.team_id
+            WHERE t.id = ?
+            GROUP BY t.id;
             """,
                 { rs, _ ->
                     Team_DTO(
@@ -125,6 +120,7 @@ GROUP BY t.id;
             throw Exception("Failed to get team by id")
         }
     }
+
 
     fun parsePlayersBought(jsonArrayString: String?): List<Player_DTO> {
         if (jsonArrayString.isNullOrEmpty()) {
@@ -182,24 +178,19 @@ GROUP BY t.id;
             return jdbcTemplate.query(
                 """
             SELECT 
-    t.id, 
-    t.name, 
-    t.owner, 
-    t.coach, 
-    t.captain, 
-    t.vice_captain, 
-    COUNT(CASE WHEN p.status = 'Sold' THEN p.id END) AS players, 
-    COALESCE(SUM(
-        CASE WHEN p.status = 'Sold' 
-            THEN NULLIF(REGEXP_REPLACE(p.sellprice, '[^0-9.]', '', 'g'), '')::NUMERIC 
-        END
-    ), 0) AS spent_money, 
-    t.created_at, 
-    t.updated_at 
-FROM team t 
-LEFT JOIN players p ON t.id = p.team_id 
-GROUP BY t.id;
-
+                t.id, 
+                t.name, 
+                t.owner, 
+                t.coach, 
+                t.captain, 
+                t.vice_captain, 
+                COUNT(CASE WHEN p.status = 'Sold' THEN p.id END) AS players, 
+                COALESCE(SUM(CASE WHEN p.status = 'Sold' THEN p.sellprice END), 0) AS spent_money, 
+                t.created_at, 
+                t.updated_at 
+            FROM team t 
+            LEFT JOIN players p ON t.id = p.team_id 
+            GROUP BY t.id;
             """,
                 { rs, _ ->
                     Team(
@@ -222,6 +213,7 @@ GROUP BY t.id;
             throw Exception("Failed to list teams")
         }
     }
+
 
 
     fun updateTeam(id: String, team: Team): Team? {

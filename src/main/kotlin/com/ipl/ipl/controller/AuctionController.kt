@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 class TeamBudgetExceededException(message: String) : RuntimeException(message)
+class PlayerNotFoundException(message: String) : RuntimeException(message)
 
 @RestController
 @CrossOrigin
@@ -20,10 +21,17 @@ class AuctionController (
 ) {
 
     @PostMapping("/get/players")
-    fun getPlayers(@RequestHeader authorization: String): ResponseEntity<Auction> {
-        // Implement logic to fetch players from the auction
-        return ResponseEntity.ok(auctionService.getPlayers(authorization))
+    fun getPlayers(@RequestHeader authorization: String): ResponseEntity<Any> {
+        return try {
+            val player = auctionService.getPlayers(authorization)
+            ResponseEntity.ok(player)
+        } catch (e: PlayerNotFoundException) {
+            ResponseEntity.badRequest().body(mapOf("error" to e.message))
+        } catch (e: Exception) {
+            ResponseEntity.internalServerError().body(mapOf("error" to "Something went wrong"))
+        }
     }
+
 
     @PostMapping("/mark/sold")
     fun markPlayerSold(@RequestBody auction: Auction): ResponseEntity<Any> {

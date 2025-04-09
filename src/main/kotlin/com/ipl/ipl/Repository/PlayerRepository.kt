@@ -1,5 +1,6 @@
 package com.ipl.ipl.Repository
 
+import com.ipl.ipl.controller.PlayerPartOfTeam
 import com.ipl.ipl.model.Player
 import com.ipl.ipl.model.PlayerList
 import org.springframework.jdbc.core.JdbcTemplate
@@ -22,8 +23,8 @@ class PlayerRepository (
             battingStyle = rs.getString("batting_style"),
             bowlingStyle = rs.getString("bowling_style"),
             teamId = rs.getString("team_id"),
-            basePrice = rs.getString("baseprice"),
-            sellPrice = rs.getString("sellprice"),
+            basePrice = rs.getDouble("baseprice"),
+            sellPrice = rs.getDouble("sellprice"),
             iplTeam = rs.getString("ipl_team"),
             status = rs.getString("status"),
             createdAt = rs.getLong("created_at"),
@@ -106,6 +107,12 @@ class PlayerRepository (
         ) ?: 0
     }
 
-    fun deletePlayer(id: String): Int = jdbcTemplate.update("DELETE FROM players WHERE id = ?", id)
+    fun deletePlayer(id: String): Int {
+        return try {
+            jdbcTemplate.update("DELETE FROM players WHERE id = ?", id)
+        } catch (e: Exception) {
+            throw PlayerPartOfTeam("Player is part of a team and cannot be deleted.")
+        }
+    }
 
 }

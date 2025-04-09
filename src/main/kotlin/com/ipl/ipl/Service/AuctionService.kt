@@ -2,8 +2,10 @@ package com.ipl.ipl.Service
 
 import com.ipl.ipl.Repository.AuctionRepository
 import com.ipl.ipl.config.JwtUtil
+import com.ipl.ipl.controller.PlayerNotFoundException
 import com.ipl.ipl.model.Auction
 import org.springframework.stereotype.Service
+
 class TeamBudgetExceededException(message: String) : RuntimeException(message)
 @Service
 class AuctionService(
@@ -11,18 +13,27 @@ class AuctionService(
     private val jwtUtil: JwtUtil
 ) {
     fun getPlayers(authorization: String): Auction {
-        val player = auctionRepository.getPlayerByRandom()
+        val player = try {
+            auctionRepository.getPlayerByRandom()
+        } catch (e: PlayerNotFoundException) {
+            throw PlayerNotFoundException("No more players left to auction.")
+        }
+
         val token = authorization.substring(7)
         val role = jwtUtil.extractRoles(token)
         val cleanedRole = role[0]
-        if(cleanedRole.contains("ADMIN")) {
-            if (player != null) {
-                auctionRepository.updateStatusToCurrentBid(player.playerId)
-            }
+
+        if (cleanedRole.contains("ADMIN")) {
+            auctionRepository.updateStatusToCurrentBid(player.playerId)
         }
-        val return_player = auctionRepository.getPlayerByCurrent_Bid()
-        return return_player
+
+        return try {
+            auctionRepository.getPlayerByCurrent_Bid()
+        } catch (e: PlayerNotFoundException) {
+            throw PlayerNotFoundException("No player is currently in bidding.")
+        }
     }
+
 
     fun markPlayerSold(auction: Auction): String {
         try {
@@ -39,8 +50,8 @@ class AuctionService(
         }
     }
 
-    fun sanitizeSellPrice(price: String?): Double {
-        return price?.split(" ")?.get(0)?.toDoubleOrNull() ?: 0.0
+    fun sanitizeSellPrice(price: Double?): Double {
+        return price ?: 0.0
     }
 
 

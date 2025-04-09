@@ -36,11 +36,11 @@ class SecurityConfig (
             .cors { it.configurationSource(corsConfigurationSource()) }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
-                auth.requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/players/list", "/api/players/get/**", "/api/team/list", "/api/team/get/**").permitAll()
-                    .requestMatchers("/api/auction/get/**").authenticated()
-                    .requestMatchers("/api/auction/**").hasRole("ADMIN")
-                    .requestMatchers("/api/players/**", "/api/team/**").hasRole("ADMIN")
+                auth
+                    .requestMatchers("/api/auth/**", "/api/players/list", "/api/players/get/**", "/api/team/list", "/api/team/get/**").permitAll()
+                    .requestMatchers("/api/auction/get/**", "/api/file/**").authenticated()
+                    .requestMatchers("/api/auction/**", "/api/players/**", "/api/team/**").hasRole("ADMIN")
+                    .anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             .build()
