@@ -1,6 +1,7 @@
 package com.ipl.ipl.Service
 
 import com.ipl.ipl.Repository.PlayerRepository
+import com.ipl.ipl.controller.PlayerPartOfTeam
 import com.ipl.ipl.model.Player
 import com.ipl.ipl.model.PlayerList
 import org.springframework.stereotype.Service
@@ -11,10 +12,13 @@ class PlayerService (
     private val repository: PlayerRepository
 ){
     fun createPlayer(player: Player): Player? {
-        if (player.sellPrice != null && player.sellPrice >= player.basePrice) {
+        val sellPrice = player.sellPrice
+        if (sellPrice != null && sellPrice >= player.basePrice && player.teamId != null) {
             player.status = "Sold"
         } else {
             player.status = "Pending"
+            player.teamId = null
+            player.sellPrice = 0.0
         }
         return repository.createPlayer(player, UUID.randomUUID().toString())
     }
@@ -23,7 +27,8 @@ class PlayerService (
         return repository.listPlayers(playerList)
     }
     fun updatePlayer(id: String, player: Player): Player? {
-        if (player.sellPrice != null && player.sellPrice >= player.basePrice) {
+        val sellPrice = player.sellPrice
+        if (sellPrice != null && sellPrice >= player.basePrice) {
             player.status = "Sold"
         } else {
             player.status = "Pending"
@@ -36,7 +41,7 @@ class PlayerService (
             val player = repository.deletePlayer(id)
             return if (player > 0) "Player deleted successfully" else "Player not found"
         } else {
-            throw Exception("Player is already a part of a team")
+            throw PlayerPartOfTeam("Player is part of a team and cannot be deleted.")
         }
     }
 }

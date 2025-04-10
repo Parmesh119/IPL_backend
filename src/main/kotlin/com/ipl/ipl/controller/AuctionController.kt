@@ -10,20 +10,30 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+
 class TeamBudgetExceededException(message: String) : RuntimeException(message)
+class PlayerNotFoundException(message: String) : RuntimeException(message)
+class MaximumMinimumPlayersReachedException(message: String) : RuntimeException(message)
 
 @RestController
 @CrossOrigin
 @RequestMapping("/api/auction")
-class AuctionController (
+class AuctionController(
     private val auctionService: AuctionService
 ) {
 
     @PostMapping("/get/players")
-    fun getPlayers(@RequestHeader authorization: String): ResponseEntity<Auction> {
-        // Implement logic to fetch players from the auction
-        return ResponseEntity.ok(auctionService.getPlayers(authorization))
+    fun getPlayers(@RequestHeader authorization: String): ResponseEntity<Any> {
+        return try {
+            val player = auctionService.getPlayers(authorization)
+            ResponseEntity.ok(player)
+        } catch (e: PlayerNotFoundException) {
+            ResponseEntity.badRequest().body(mapOf("error" to e.message))
+        } catch (e: Exception) {
+            ResponseEntity.internalServerError().body(mapOf("error" to "Something went wrong"))
+        }
     }
+
 
     @PostMapping("/mark/sold")
     fun markPlayerSold(@RequestBody auction: Auction): ResponseEntity<Any> {
@@ -31,7 +41,9 @@ class AuctionController (
             auctionService.markPlayerSold(auction)
             ResponseEntity.ok("Player marked as sold.")
         } catch (e: TeamBudgetExceededException) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message) // Return 400 for budget exceeded
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message)
+        } catch (e: MaximumMinimumPlayersReachedException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message)
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error marking player as sold: ${e.message}")
         }

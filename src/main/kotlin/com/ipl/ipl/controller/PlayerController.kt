@@ -3,9 +3,9 @@ package com.ipl.ipl.controller
 import com.ipl.ipl.Service.PlayerService
 import com.ipl.ipl.model.Player
 import com.ipl.ipl.model.PlayerList
-import org.springframework.http.CacheControl
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+class PlayerPartOfTeam(message: String) : RuntimeException(message)
 
 @RestController
 @CrossOrigin
@@ -35,5 +35,15 @@ class PlayerController (
     fun updatePlayer(@RequestBody player: Player): ResponseEntity<Player> = ResponseEntity.ok(service.updatePlayer(player.id!!, player))
 
     @DeleteMapping("/delete/{id}")
-    fun deletePlayer(@PathVariable id: String): ResponseEntity<String> = ResponseEntity.ok(service.deletePlayer(id))
+    fun deletePlayer(@PathVariable id: String): ResponseEntity<String> {
+        return try {
+            ResponseEntity.ok(service.deletePlayer(id))
+        } catch (e: PlayerPartOfTeam) {
+            return ResponseEntity.status(400).body("Cannot delete player because they are part of a team.")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            println("Error occurred while deleting player: ${e.message}")
+            ResponseEntity.status(500).body("An error occurred while deleting the player.")
+        }
+    }
 }
