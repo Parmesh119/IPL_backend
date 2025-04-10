@@ -26,13 +26,21 @@ class AuctionService(
 
     fun getPlayers(authorization: String): Auction {
         try {
-            val token = authorization.substring(7)
-            val role = jwtUtil.extractRoles(token)
-            val cleanedRole = role[0]
+            val currentBidPlayer = auctionRepository.getCountCurrentBid()
+            if(currentBidPlayer > 0) {
+                if(currentBidPlayer != 1) {
+                    val onePlayer = auctionRepository.updatePlayerStatuses()
+                    return onePlayer ?: throw PlayerNotFoundException("No player found with status 'Current_Bid'")
+                }
+            } else {
+                val token = authorization.substring(7)
+                val role = jwtUtil.extractRoles(token)
+                val cleanedRole = role[0]
 
-            if (cleanedRole.contains("ADMIN")) {
-                val player = auctionRepository.getPlayerByRandom()
-                auctionRepository.updateStatusToCurrentBid(player.playerId)
+                if (cleanedRole.contains("ADMIN")) {
+                    val player = auctionRepository.getPlayerByRandom()
+                    auctionRepository.updateStatusToCurrentBid(player.playerId)
+                }
             }
 
         } catch (e: PlayerNotFoundException) {

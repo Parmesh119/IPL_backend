@@ -48,6 +48,41 @@ class AuctionRepository (private val jdbcTemplate: JdbcTemplate) {
         return result.firstOrNull() ?: throw PlayerNotFoundException("No player found with status 'Current_Bid'")
     }
 
+    fun getPlayerByCurrent_BidAll(): List<Auction> {
+        val result = jdbcTemplate.query(
+            "SELECT * FROM players WHERE status = 'Current_Bid' ORDER BY RANDOM()",
+            rowMapper
+        )
+        return result
+    }
+
+    fun updatePlayerStatuses(): Auction? {
+        val players = getPlayerByCurrent_BidAll()
+        if (players.isNotEmpty()) {
+            // Set the first player's status to "Current_Bid"
+            jdbcTemplate.update(
+                "UPDATE players SET status = 'Current_Bid' WHERE id = ?",
+                players[0].playerId
+            )
+
+            // Set the rest of the players' statuses to "Pending"
+            for (i in 1 until players.size) {
+                jdbcTemplate.update(
+                    "UPDATE players SET status = 'Pending' WHERE id = ?",
+                    players[i].playerId
+                )
+            }
+
+            return players[0]
+        }
+        return null
+    }
+
+    fun getCountCurrentBid(): Int {
+        val sql = "SELECT COUNT(*) FROM players WHERE status = 'Current_Bid'"
+        return jdbcTemplate.queryForObject(sql, Int::class.java) ?: 0
+    }
+
 
     fun markPlayerSold(auction: Auction): String {
         jdbcTemplate.update(
