@@ -10,13 +10,15 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+
 class TeamBudgetExceededException(message: String) : RuntimeException(message)
 class PlayerNotFoundException(message: String) : RuntimeException(message)
+class MaximumMinimumPlayersReachedException(message: String) : RuntimeException(message)
 
 @RestController
 @CrossOrigin
 @RequestMapping("/api/auction")
-class AuctionController (
+class AuctionController(
     private val auctionService: AuctionService
 ) {
 
@@ -39,7 +41,9 @@ class AuctionController (
             auctionService.markPlayerSold(auction)
             ResponseEntity.ok("Player marked as sold.")
         } catch (e: TeamBudgetExceededException) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message) // Return 400 for budget exceeded
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message)
+        } catch (e: MaximumMinimumPlayersReachedException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message)
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error marking player as sold: ${e.message}")
         }

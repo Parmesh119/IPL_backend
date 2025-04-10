@@ -39,7 +39,7 @@ class SecurityConfig (
                 auth
                     .requestMatchers("/api/auth/**", "/api/players/list", "/api/players/get/**", "/api/team/list", "/api/team/get/**").permitAll()
                     .requestMatchers("/api/auction/get/**", "/api/file/**").authenticated()
-                    .requestMatchers("/api/auction/**", "/api/players/**", "/api/team/**").hasRole("ADMIN")
+                    .requestMatchers("/api/auction/**", "/api/players/**", "/api/team/**", "/api/settings/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)

@@ -52,10 +52,7 @@ class FileUploadService (
         // Retrieve parsed values, respecting nulls from parsing
         val name = player["name"] as? String
         val country = player["country"] as? String
-        val age = player["age"] as? Int // Already handles null correctly
         val role = player["role"] as? String
-        val battingStyle = player["batting_style"] as? String
-        val bowlingStyle = player["bowling_style"] as? String
         val teamId = player["team_id"] as? String
         val baseprice = player["baseprice"] as? Double
         val iplTeam = player["ipl_team"] as? String // Retrieve ipl_team if it's in the file
@@ -67,15 +64,11 @@ class FileUploadService (
             "id" to UUID.randomUUID().toString(), // Default: Auto-generated
             "name" to name, // Required (NOT NULL) - null will cause DB error if input missing
             "country" to country, // Required (NOT NULL) - null will cause DB error if input missing
-            "age" to age, // Nullable - null is allowed
             "role" to role, // Required (NOT NULL) - null will cause DB error if input missing
-            "batting_style" to battingStyle, // Required (NOT NULL) - null will cause DB error if input missing
-            "bowling_style" to bowlingStyle, // Required (NOT NULL) - null will cause DB error if input missing
             "created_at" to currentTime, // Nullable, but we always set it
             "updated_at" to currentTime, // Nullable, but we always set it
             "team_id" to teamId, // Required (NOT NULL, FK) - null or invalid ID will cause DB error
             "baseprice" to (baseprice ?: 0.0), // NOT NULL, Default: 0.0
-            "sellprice" to 0.0, // NOT NULL, Default: 0.0 (Assuming sellprice is not in the file)
             "status" to "Pending", // Nullable, but we set a default
             "ipl_team" to (iplTeam ?: "") // NOT NULL, Default: ''
             // If 'ipl_team' *was* in your file, use player["ipl_team"] as? String ?: ""
@@ -85,8 +78,6 @@ class FileUploadService (
     private fun parseCSV(file: MultipartFile): List<Map<String, Any?>> {
         val players = mutableListOf<Map<String, Any?>>()
         BufferedReader(InputStreamReader(file.inputStream)).use { reader ->
-            // Assume header is: name,country,age,role,batting_style,bowling_style,baseprice,team_id[,ipl_team]
-            // Adjust indices if your CSV header order is different
             val header = reader.readLine()?.split(",")?.map { it.trim() }
             if (header == null) return emptyList() // Handle empty file
 
@@ -131,10 +122,7 @@ class FileUploadService (
         return mapOf(
             "name" to map["name"],
             "country" to map["country"],
-            "age" to map["age"],
             "role" to map["role"],
-            "batting_style" to map["batting_style"],
-            "bowling_style" to map["bowling_style"],
             "baseprice" to map["baseprice"],
             "team_id" to map["team_id"],
             "ipl_team" to map["ipl_team"] // Include if ipl_team is in your CSV
@@ -213,10 +201,7 @@ class FileUploadService (
         return mapOf(
             "name" to playerMap["name"],
             "country" to playerMap["country"],
-            "age" to playerMap["age"],
             "role" to playerMap["role"],
-            "batting_style" to playerMap["batting_style"],
-            "bowling_style" to playerMap["bowling_style"],
             "baseprice" to playerMap["baseprice"],
             "team_id" to playerMap["team_id"],
             "ipl_team" to playerMap["ipl_team"] // Include if ipl_team is in your Excel

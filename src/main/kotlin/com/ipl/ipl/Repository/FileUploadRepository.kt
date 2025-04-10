@@ -15,24 +15,20 @@ class FileUploadRepository (
             try {
                 val sql = """
                     INSERT INTO players (
-                        id, name, country, age, role, batting_style, bowling_style,
-                        created_at, updated_at, team_id, baseprice, sellprice, status, ipl_team
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        id, name, country, role,
+                        created_at, updated_at, team_id, baseprice, status, ipl_team
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
 
                 jdbcTemplate.update(sql,
                     player["id"],           // text, not null (auto-generated)
                     player["name"],         // character varying(255), not null
                     player["country"],      // character varying(50), not null
-                    player["age"],          // integer, nullable
                     player["role"],         // character varying(50), not null
-                    player["batting_style"],// character varying(50), not null
-                    player["bowling_style"],// character varying(50), not null
                     player["created_at"],   // bigint, nullable (but we set it)
                     player["updated_at"],   // bigint, nullable (but we set it)
                     player["team_id"],      // text, not null, FK
                     player["baseprice"],    // double precision, not null, default 0.0
-                    player["sellprice"],    // double precision, not null, default 0.0
                     player["status"],       // text, nullable (but we set it)
                     player["ipl_team"]      // text, not null, default ''
                 )

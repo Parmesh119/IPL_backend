@@ -1,0 +1,4 @@
+ALTER TABLE players
+    ALTER COLUMN batting_style DROP NOT NULL,
+    ALTER COLUMN bowling_style DROP NOT NULL,
+    ALTER COLUMN age DROP NOT NULL;

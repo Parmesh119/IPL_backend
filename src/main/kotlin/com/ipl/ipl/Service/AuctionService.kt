@@ -1,17 +1,29 @@
 package com.ipl.ipl.Service
 
 import com.ipl.ipl.Repository.AuctionRepository
+import com.ipl.ipl.Repository.PlayerRepository
 import com.ipl.ipl.config.JwtUtil
 import com.ipl.ipl.controller.PlayerNotFoundException
 import com.ipl.ipl.model.Auction
+import com.ipl.ipl.model.Settings
 import org.springframework.stereotype.Service
 
 class TeamBudgetExceededException(message: String) : RuntimeException(message)
 @Service
 class AuctionService(
     private val auctionRepository: AuctionRepository,
-    private val jwtUtil: JwtUtil
+    private val jwtUtil: JwtUtil,
+    private val playerRepository: PlayerRepository
 ) {
+    var maxPlayers: Int = 23
+    var minPlayers: Int = 15
+    var budgetLimit: Int = 100
+    val settings = mutableMapOf<String, Any>(
+        "maxPlayers" to maxPlayers,
+        "minPlayers" to minPlayers,
+        "budgetLimit" to budgetLimit,
+    )
+
     fun getPlayers(authorization: String): Auction {
         val player = try {
             auctionRepository.getPlayerByRandom()
@@ -40,10 +52,15 @@ class AuctionService(
             val spent = auctionRepository.findSpentFromTeamId(auction.teamId!!)
             val sanitizedSellPrice = sanitizeSellPrice(auction.sellPrice)
 
-            if (spent + sanitizedSellPrice > 100.0) {
+            if (spent + sanitizedSellPrice > settings["budgetLimit"] as Int) {
                 throw TeamBudgetExceededException("Team budget exceeded!!")
             }
 
+            val totalPlayer = playerRepository.countPlayerByTeamId(auction.teamId)
+            println(settings["maxPlayers"] as Int)
+            if(totalPlayer >= settings["maxPlayers"] as Int) {
+                throw TeamBudgetExceededException("Team has reached the maximum number of players.")
+            }
             return auctionRepository.markPlayerSold(auction)
         } catch (e: TeamBudgetExceededException) {
             throw e
@@ -61,5 +78,25 @@ class AuctionService(
 
     fun updateStatus(playerId: String) {
         return auctionRepository.updateStatus(playerId)
+    }
+
+    fun updateSettings(newSettings: Settings): Settings {
+        settings.clear()
+        settings["maxPlayers"] = newSettings.maxPlayers
+        settings["minPlayers"] = newSettings.minPlayers
+        settings["budgetLimit"] = newSettings.budgetLimit
+        return Settings(
+            maxPlayers = settings["maxPlayers"] as Int,
+            minPlayers = settings["minPlayers"] as Int,
+            budgetLimit = settings["budgetLimit"] as Int,
+        )
+    }
+
+    fun getSettings(): Settings {
+        return Settings(
+            maxPlayers = settings["maxPlayers"] as Int,
+            minPlayers = settings["minPlayers"] as Int,
+            budgetLimit = settings["budgetLimit"] as Int
+        )
     }
 }

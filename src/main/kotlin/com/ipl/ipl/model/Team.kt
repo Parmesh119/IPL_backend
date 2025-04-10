@@ -33,6 +33,7 @@ data class Team_DTO (
 )
 
 data class Player_DTO (
+    val id: String? = null,
     val srNo: Int = 0,
     val player: String = "",
     val iplTeam: String = "",

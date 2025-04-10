@@ -83,6 +83,7 @@ class TeamRepository(
                 COUNT(CASE WHEN p.role = 'All-rounder' THEN 1 END) AS all_rounders_count, 
                 JSON_AGG(
                     JSON_BUILD_OBJECT(
+                        'id', p.player_id,
                         'srNo', p.sr_no,
                         'player', COALESCE(p.player_name, ''),
                         'iplTeam', p.ipl_team,
@@ -140,6 +141,7 @@ class TeamRepository(
 
                 for (node in jsonArray) {
                     val player = Player_DTO(
+                        id = node.get("id")?.asText() ?: "",
                         srNo = node.get("srNo")?.asInt() ?: 0,
                         player = node.get("player")?.asText() ?: "",
                         iplTeam = node.get("iplTeam")?.asText() ?: "",
