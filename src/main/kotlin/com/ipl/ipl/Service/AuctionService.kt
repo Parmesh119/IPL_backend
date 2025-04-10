@@ -25,18 +25,18 @@ class AuctionService(
     )
 
     fun getPlayers(authorization: String): Auction {
-        val player = try {
-            auctionRepository.getPlayerByRandom()
+        try {
+            val token = authorization.substring(7)
+            val role = jwtUtil.extractRoles(token)
+            val cleanedRole = role[0]
+
+            if (cleanedRole.contains("ADMIN")) {
+                val player = auctionRepository.getPlayerByRandom()
+                auctionRepository.updateStatusToCurrentBid(player.playerId)
+            }
+
         } catch (e: PlayerNotFoundException) {
             throw PlayerNotFoundException("No more players left to auction.")
-        }
-
-        val token = authorization.substring(7)
-        val role = jwtUtil.extractRoles(token)
-        val cleanedRole = role[0]
-
-        if (cleanedRole.contains("ADMIN")) {
-            auctionRepository.updateStatusToCurrentBid(player.playerId)
         }
 
         return try {
@@ -57,7 +57,6 @@ class AuctionService(
             }
 
             val totalPlayer = playerRepository.countPlayerByTeamId(auction.teamId)
-            println(settings["maxPlayers"] as Int)
             if(totalPlayer >= settings["maxPlayers"] as Int) {
                 throw TeamBudgetExceededException("Team has reached the maximum number of players.")
             }
