@@ -2,6 +2,7 @@ package com.ipl.ipl.Service
 
 import com.ipl.ipl.Repository.UserRepository
 import com.ipl.ipl.config.JwtUtil
+import com.ipl.ipl.controller.UsernameAlreadyExistsException
 import com.ipl.ipl.model.AuthResponse
 import com.ipl.ipl.model.RegisterRequest
 import com.ipl.ipl.model.User
@@ -17,9 +18,16 @@ class UserService (
         return userRepository.login(username, password)
     }
 
-    fun register(registerRequest: RegisterRequest): User {
+    fun register(registerRequest: RegisterRequest): Any {
+        try {
+            return userRepository.register(registerRequest)
+        } catch (e: UsernameAlreadyExistsException) {
+            throw UsernameAlreadyExistsException("Username already exists")
+        } catch (e: Exception) {
+            throw Exception("Failed to register user")
+        }
         // Implement registration logic here
-        return userRepository.register(registerRequest)
+
     }
 
     fun getUserDetails(authorization: String): User {

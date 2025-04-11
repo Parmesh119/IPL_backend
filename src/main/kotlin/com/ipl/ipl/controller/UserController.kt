@@ -2,6 +2,7 @@ package com.ipl.ipl.controller
 
 import com.ipl.ipl.Service.UserService
 import com.ipl.ipl.model.*
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+
+class UsernameAlreadyExistsException(message: String) : RuntimeException(message)
 
 @RestController
 @CrossOrigin(origins = ["http://localhost:3001"])
@@ -23,9 +26,13 @@ class UserController (
     }
 
     @PostMapping("/register")
-    fun register(@RequestBody registerRequest: RegisterRequest): ResponseEntity<User> {
+    fun register(@RequestBody registerRequest: RegisterRequest): ResponseEntity<Any> {
         // Implement registration logic here
-        return ResponseEntity.ok(userService.register(registerRequest))
+        return try {
+            ResponseEntity.ok(userService.register(registerRequest))
+        } catch (e: UsernameAlreadyExistsException) {
+            ResponseEntity.badRequest().body(mapOf("error" to e.message))
+        }
     }
 
     @PostMapping("/get/user")

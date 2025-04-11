@@ -1,6 +1,7 @@
 package com.ipl.ipl.Repository
 
 import com.ipl.ipl.config.JwtUtil
+import com.ipl.ipl.controller.UsernameAlreadyExistsException
 import com.ipl.ipl.model.AuthResponse
 import com.ipl.ipl.model.RegisterRequest
 import com.ipl.ipl.model.User
@@ -64,25 +65,16 @@ class UserRepository(
     fun register(registerRequest: RegisterRequest): User {
         try {
             // Check if the username already exists
-            val existingUser: User? = try {
-                jdbcTemplate.query(
-                    "SELECT * FROM users WHERE username = ?",
-                    rowMapper,
-                    registerRequest.username
-                ).firstOrNull() // ✅ Use query() instead of queryForObject()
-            } catch (e: Exception) {
-                println(e.message)
-                throw Exception("Failed to fetch user from the database")
-            }
-
-            if (existingUser != null) {
-                throw Exception("Username already exists")
-            }
+            val existingUser: User = jdbcTemplate.query(
+                "SELECT * FROM users WHERE username = ?",
+                rowMapper,
+                registerRequest.username
+            ).firstOrNull() ?: throw UsernameAlreadyExistsException("Username already exists")
 
             val newUserId = registerRequest.id ?: UUID.randomUUID().toString()
 
             // Insert the new user into the database
-            jdbcTemplate.update(
+            val insertUser = jdbcTemplate.update(
                 "INSERT INTO users (id, username, password, name, role, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                 newUserId,
                 registerRequest.username,
@@ -91,6 +83,10 @@ class UserRepository(
                 registerRequest.role.joinToString(","),
                 registerRequest.createdAt
             )
+
+            if (insertUser == 0) {
+                throw UsernameAlreadyExistsException("Username already exists")
+            }
 
             return User(
                 id = newUserId,
