@@ -16,7 +16,7 @@ class FileUploadRepository (
                 val sql = """
                     INSERT INTO players (
                         id, name, country, role,
-                        created_at, updated_at, team_id, baseprice, status, ipl_team
+                        created_at, updated_at, baseprice, status, ipl_team, image_url
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent()
 
@@ -27,10 +27,10 @@ class FileUploadRepository (
                     player["role"],         // character varying(50), not null
                     player["created_at"],   // bigint, nullable (but we set it)
                     player["updated_at"],   // bigint, nullable (but we set it)
-                    player["team_id"],      // text, not null, FK
                     player["baseprice"],    // double precision, not null, default 0.0
                     player["status"],       // text, nullable (but we set it)
-                    player["ipl_team"]      // text, not null, default ''
+                    player["ipl_team"],      // text, not null, default ''
+                    player["image_url"]     // text, not null, default ''
                 )
                 savedCount++
             } catch (e: DataAccessException) {

@@ -53,9 +53,9 @@ class FileUploadService (
         val name = player["name"] as? String
         val country = player["country"] as? String
         val role = player["role"] as? String
-        val teamId = player["team_id"] as? String
         val baseprice = player["baseprice"] as? Double
         val iplTeam = player["ipl_team"] as? String // Retrieve ipl_team if it's in the file
+        val image_url = player["image_url"] as? String
 
         // Apply database rules: NOT NULL constraints must be met by input or defaults
         // If a required field (NOT NULL, no default) is null here, the DB insert will fail, which is correct.
@@ -67,11 +67,10 @@ class FileUploadService (
             "role" to role, // Required (NOT NULL) - null will cause DB error if input missing
             "created_at" to currentTime, // Nullable, but we always set it
             "updated_at" to currentTime, // Nullable, but we always set it
-            "team_id" to teamId, // Required (NOT NULL, FK) - null or invalid ID will cause DB error
             "baseprice" to (baseprice ?: 0.0), // NOT NULL, Default: 0.0
             "status" to "Pending", // Nullable, but we set a default
-            "ipl_team" to (iplTeam ?: "") // NOT NULL, Default: ''
-            // If 'ipl_team' *was* in your file, use player["ipl_team"] as? String ?: ""
+            "ipl_team" to (iplTeam ?: ""), // NOT NULL, Default: ''
+            "image_url" to (image_url ?: "https://static-00.iconduck.com/assets.00/profile-circle-icon-512x512-zxne30hp.png"), // NOT NULL, Default: ''
         )
     }
 
@@ -125,7 +124,8 @@ class FileUploadService (
             "role" to map["role"],
             "baseprice" to map["baseprice"],
             "team_id" to map["team_id"],
-            "ipl_team" to map["ipl_team"] // Include if ipl_team is in your CSV
+            "ipl_team" to map["ipl_team"],
+            "image_url" to map["image_url"],
         )
     }
 
@@ -204,7 +204,8 @@ class FileUploadService (
             "role" to playerMap["role"],
             "baseprice" to playerMap["baseprice"],
             "team_id" to playerMap["team_id"],
-            "ipl_team" to playerMap["ipl_team"] // Include if ipl_team is in your Excel
+            "ipl_team" to playerMap["ipl_team"], // Include if ipl_team is in your Excel
+            "image_url" to playerMap["image_url"], // Include if image_url is in your Excel
         )
     }
 

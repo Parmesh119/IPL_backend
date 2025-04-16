@@ -1,0 +1,20 @@
+name,country,role,baseprice,ipl_team,image_url
+Rohit Sharma,India,Batsman,5,Mumbai Indians,https://documents.iplt20.com/ipl/IPLHeadshot2024/6.png
+Suryakumar Yadav,India,Batsman,5,Royal Challengers Bengaluru,https://documents.iplt20.com/ipl/IPLHeadshot2024/174.png
+Robin Minz,India,Batsman,1,Punjab Kings,https://www.iplt20.com/assets/images/default-headshot.png
+Ryan Rickelton,South Africa,Batsman,2.5,Chennai Super Kings,https://www.iplt20.com/assets/images/default-headshot.png
+Shrijith Krishnan,India,Batsman,0.5,Lucknow Super Giants,https://www.iplt20.com/assets/images/default-headshot.png
+Bevon-John Jacobs,South Africa,Batsman,1,Sunrisers Hyderabad,https://www.iplt20.com/assets/images/default-headshot.png
+N. Tilak Varma,India,Batsman,5,Mumbai Indians,https://documents.iplt20.com/ipl/IPLHeadshot2024/993.png
+Hardik Pandya,India,All-Rounder,5,Gujarat Titans,https://documents.iplt20.com/ipl/IPLHeadshot2024/54.png
+Naman Dhir,India,All-Rounder,2.5,Kolkata Knight Riders,https://documents.iplt20.com/ipl/IPLHeadshot2024/3107.png
+Will Jacks,England,All-Rounder,2.5,Rajasthan Royals,https://www.iplt20.com/assets/images/default-headshot.png
+Mitchell Santner,New Zealand,All-Rounder,5,Delhi Capitals,https://www.iplt20.com/assets/images/default-headshot.png
+Raj Angad Bawa,India,All-Rounder,0.5,Royal Challengers Bengaluru,https://www.iplt20.com/assets/images/default-headshot.png
+Vignesh Puthur,India,All-Rounder,0.5,Gujarat Titans,https://www.iplt20.com/assets/images/default-headshot.png
+Trent Boult,New Zealand,Bowler,5,Kolkata Knight Riders,https://www.iplt20.com/assets/images/default-headshot.png
+Karn Sharma,India,Bowler,2.5,Delhi Capitals,https://www.iplt20.com/assets/images/default-headshot.png
+Deepak Chahar,India,Bowler,2.5,Chennai Super Kings,https://www.iplt20.com/assets/images/default-headshot.png
+Ashwani Kumar,India,Bowler,0.5,Rajasthan Royals,https://www.iplt20.com/assets/images/default-headshot.png
+Reece Topley,England,Bowler,1,Punjab Kings,https://www.iplt20.com/assets/images/default-headshot.png
+Venkata Satyanarayana Penmetsa,India,Bowler,0.5,Sunrisers Hyderabad,

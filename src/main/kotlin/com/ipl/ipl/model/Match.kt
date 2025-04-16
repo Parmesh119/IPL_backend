@@ -5,9 +5,15 @@ data class Match(
     val team1: String,
     val team2: String,
     val date: String,
+    val day: String,
+    val time: String,
     val venue: String
 )
 
 data class MatchList (
-    val type: String? = "recent"
+    val search: String? = null,
+    val page: Int = 1,
+    val size: Int = 10,
+    val type: String? = "All",
+    val ipl_team: String? = null,
 )

@@ -1,14 +1,10 @@
 package com.ipl.ipl.controller
 
-import com.ipl.ipl.Service.MatchService
 import com.ipl.ipl.model.Match
 import com.ipl.ipl.model.MatchList
+import com.ipl.ipl.Service.MatchService
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin
@@ -16,8 +12,11 @@ import org.springframework.web.bind.annotation.RestController
 class MatchController (
     private val matchService: MatchService
 ) {
-    @GetMapping("/matches/list")
-    fun getMatches(@RequestBody request: MatchList): ResponseEntity<List<Match>> {
-        return ResponseEntity.ok(matchService.getMatches(request.type!!))
+    @PostMapping("/matches/list")
+    fun getMatches(
+        @RequestBody request: MatchList
+    ): ResponseEntity<List<Match>> {
+        val matches = matchService.getMatches(request)
+        return ResponseEntity.ok(matches)
     }
 }

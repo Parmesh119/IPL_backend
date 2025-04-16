@@ -16,6 +16,7 @@ class PlayerRepository (
     private val rowMapper = RowMapper { rs: ResultSet, _: Int ->
         Player(
             id = rs.getString("id"),
+            image_url = rs.getString("image_url"),
             name = rs.getString("name"),
             country = rs.getString("country"),
             age = rs.getInt("age"),
@@ -41,9 +42,12 @@ class PlayerRepository (
         return getPlayerById(id)
     }
 
-    fun getPlayerById(id: String): Player? = jdbcTemplate.queryForObject(
-        "SELECT * FROM players WHERE id = ?", rowMapper, id
-    )
+    fun getPlayerById(id: String): Player? {
+        val playerdata = jdbcTemplate.queryForObject(
+            "SELECT * FROM players WHERE id = ?", rowMapper, id
+        )
+        return playerdata
+    }
 
     fun listPlayers(playerList: PlayerList): List<Player> {
         val sql = StringBuilder("SELECT * FROM players WHERE 1=1")

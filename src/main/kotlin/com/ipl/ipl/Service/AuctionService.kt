@@ -18,10 +18,12 @@ class AuctionService(
     var maxPlayers: Int = 23
     var minPlayers: Int = 15
     var budgetLimit: Int = 100
+    var maxTeam: Int = 1
     val settings = mutableMapOf<String, Any>(
         "maxPlayers" to maxPlayers,
         "minPlayers" to minPlayers,
         "budgetLimit" to budgetLimit,
+        "maxTeam" to maxTeam
     )
 
     fun getPlayers(authorization: String): Auction {
@@ -92,10 +94,12 @@ class AuctionService(
         settings["maxPlayers"] = newSettings.maxPlayers
         settings["minPlayers"] = newSettings.minPlayers
         settings["budgetLimit"] = newSettings.budgetLimit
+        settings["maxTeam"] = newSettings.maxTeam
         return Settings(
             maxPlayers = settings["maxPlayers"] as Int,
             minPlayers = settings["minPlayers"] as Int,
             budgetLimit = settings["budgetLimit"] as Int,
+            maxTeam = settings["maxTeam"] as Int
         )
     }
 
@@ -103,7 +107,8 @@ class AuctionService(
         return Settings(
             maxPlayers = settings["maxPlayers"] as Int,
             minPlayers = settings["minPlayers"] as Int,
-            budgetLimit = settings["budgetLimit"] as Int
+            budgetLimit = settings["budgetLimit"] as Int,
+            maxTeam = settings["maxTeam"] as Int
         )
     }
 }

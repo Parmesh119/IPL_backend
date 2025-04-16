@@ -11,6 +11,7 @@ class AuctionRepository (private val jdbcTemplate: JdbcTemplate) {
         Auction(
             playerId = rs.getString("id"),
             name = rs.getString("name"),
+            image_url = rs.getString("image_url"),
             country = rs.getString("country"),
             basePrice = rs.getDouble("baseprice"),
             role = rs.getString("role"),

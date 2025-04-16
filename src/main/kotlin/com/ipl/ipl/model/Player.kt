@@ -5,6 +5,7 @@ import java.util.*
 
 data class Player(
     val id: String? = UUID.randomUUID().toString(),
+    val image_url: String? = "https://static-00.iconduck.com/assets.00/profile-circle-icon-512x512-zxne30hp.png",
     val name: String,
     val country: String,
     val age: Int? = null,

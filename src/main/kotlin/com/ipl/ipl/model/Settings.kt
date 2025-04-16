@@ -4,4 +4,5 @@ data class Settings (
     val maxPlayers: Int,
     val minPlayers: Int,
     val budgetLimit: Int,
+    val maxTeam: Int
 )
