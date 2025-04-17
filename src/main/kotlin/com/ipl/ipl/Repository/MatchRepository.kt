@@ -4,11 +4,14 @@ import com.ipl.ipl.model.Match
 import org.apache.poi.ss.usermodel.DataFormatter
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.core.io.ClassPathResource
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 import java.io.IOException
 
 @Repository
-class MatchRepository {
+class MatchRepository (
+    private val jdbcTemplate: JdbcTemplate
+) {
 
     private val excelFilePath = "excel/ipl_schedule.xlsx"
 
@@ -66,4 +69,36 @@ class MatchRepository {
         }
         return matches
     }
+
+    fun getTeamByPlayerName(name: String, iplTeam: String): String? {
+        try {
+            val sql = "SELECT team_id FROM players WHERE name = ? AND ipl_team = ?"
+            return jdbcTemplate.queryForObject(
+                sql,
+                arrayOf(name, iplTeam),
+                String::class.java
+            )
+        } catch (e: Exception) {
+            return e.message
+        }
+    }
+
+    fun getPoints(teamId: String?): Int {
+        return try {
+            val sql = "SELECT SUM(points) FROM team WHERE id = ?"
+            jdbcTemplate.queryForObject(sql, arrayOf(teamId), Int::class.java) ?: 0
+        } catch (e: Exception) {
+            return 0
+        }
+    }
+
+    fun insertPoints(teamId: String?, point: Int) {
+        try {
+            val updateSql = "UPDATE team SET points = ? WHERE id = ?"
+            jdbcTemplate.update(updateSql, point, teamId)
+        } catch (e: Exception) {
+            throw Exception("Error while storing points")
+        }
+    }
+
 }

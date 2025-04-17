@@ -1,0 +1,2 @@
+ALTER TABLE team
+    ADD COLUMN points INT DEFAULT 0;

@@ -2,7 +2,12 @@ package com.ipl.ipl.Service
 import com.ipl.ipl.model.Match
 import com.ipl.ipl.model.MatchList
 import com.ipl.ipl.Repository.MatchRepository
+import com.ipl.ipl.model.FantasyPointsEntry
+import com.ipl.ipl.model.FantasyPointsRequest
+import com.ipl.ipl.model.FantasyPointsResponse
+import com.ipl.ipl.model.PlayerFantasyPoints
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -87,4 +92,45 @@ class MatchService(private val matchRepository: MatchRepository) {
             false
         }
     }
+
+    @Transactional
+    fun savePoints(request: FantasyPointsRequest): FantasyPointsResponse {
+        try {
+            for ((playerName, point) in request.points) {
+                val teamId: String? = try {
+                    matchRepository.getTeamByPlayerName(playerName, request.iplTeam1)
+                } catch (e1: Exception) {
+                    try {
+                        matchRepository.getTeamByPlayerName(playerName, request.iplTeam2)
+                    } catch (e2: Exception) {
+                        return FantasyPointsResponse(
+                            success = false,
+                            message = "Error: Player '$playerName' not found in both teams."
+                        )
+                    }
+                }
+
+                var totalPoints = matchRepository.getPoints(teamId)
+                if (totalPoints == 0) {
+                    totalPoints = point
+                } else {
+                    totalPoints += point
+                }
+
+                matchRepository.insertPoints(teamId, point)
+            }
+
+            return FantasyPointsResponse(
+                success = true,
+                message = "Points saved successfully for all players."
+            )
+        } catch (ex: Exception) {
+            return FantasyPointsResponse(
+                success = false,
+                message = "Error occurred while saving points: ${ex.message}"
+            )
+        }
+    }
+
+
 }
